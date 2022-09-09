@@ -58,6 +58,7 @@ class Ripple:
 
     def _upload_image(self, image_path: str, upload_url: str, params: dict):
         files = {"file": (image_path, open(image_path, 'rb'))}
+        # JSON values (e.g. booleans) must be strings (e.g. 'true' instead of True)
         r = requests.post(upload_url, files=files, data=convert(params))
         # print(f"{r.request.body=}")
         return r.json()
