@@ -1,74 +1,221 @@
-import json
-
-from email.mime import image
+import logging
+from typing import BinaryIO
 from urllib.parse import urljoin
 
 import requests
 
-RIPPLE_API_URL = "https://webapp.drinkripples.com/api/v1/"
+# Logger
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
+
+RIPPLES_API_URL = "https://webapp.drinkripples.com/api/v1/"
 
 
-def extract_data(response: dict):
-    return response['data']
+def api_endpoint(*url_parts) -> str:
+    """Build an Ripples API URL endpoint
+    
+    Args:
+        *url_parts: parts of the URL,
+            e.g. "pushUrl", "123"
+
+    Returns:
+        str: the Ripples API followd by url_parts joined by slashes
+    """
+    url_parts = (RIPPLES_API_URL, ) + url_parts
+
+    # Strip the ending slash of each part before joining
+    return '/'.join([x.rstrip('/') for x in url_parts])
 
 
-# https://stackoverflow.com/a/42658558
-def convert(obj):
-    if isinstance(obj, bool):
-        return str(obj).lower()
-    if isinstance(obj, (list, tuple)):
-        return [convert(item) for item in obj]
-    if isinstance(obj, dict):
-        return {convert(key):convert(value) for key, value in obj.items()}
-    return obj
-
-class Ripple:
-
-    @staticmethod
-    def locations(lat: int, lon: int):
-        endpoint = urljoin(RIPPLE_API_URL, "locations")
-        data = {"latitude": lat, "longitude": lon}
-        r = requests.post(endpoint, data=data)
-        return extract_data(r.json())
+class Rippler:
+    """Rippler: An interface to the Ripples drink printer platform
+    
+    Args:
+        location_id: the location hash of the Ripples machine location.
+            Use `Ripple.locations()` to find the `location_id`
+    """
 
     def __init__(self, location_id: str):
         self.location_id = location_id
 
+    @staticmethod
+    def locations(lat: int, lon: int) -> dict:
+        """Fetched closest Ripples machine locations
+
+        Args:
+            lat (int): the latitude, in decimal degrees
+            lon (int): the longitude, in decimal degrees
+
+        Returns:
+            list: A list of dicts of the type:
+
+                {id: str, name: str, address: str,
+                distance: int, variants: list[str],
+                latitude: int, longtitude: int, shortId: str}
+
+        """
+        endpoint = api_endpoint("locations")
+        data = {"latitude": lat, "longitude": lon}
+
+        try:
+            r = requests.post(endpoint, data=data)
+            r.raise_for_status()
+            return RipplesResponse(r.json()).data
+        except requests.exceptions.RequestException as e:
+            raise RipplesException(str(e))
+
+    def send_image_file(self, image_path: str) -> dict:
+        """Send an image file to the printer
+
+        Args:
+            image_path: the path of an image to send to the printer
+
+        Returns:
+            dict: the response of the type:
+
+                {rippleUri: str, printUrl: str, previewUrl: str,
+                ordinal: int, token: str}
+
+                'ordinal' is the number of the image in the machine's queue
+        """
+        # TODO: try/except
+        with open(image_path, "rb") as img:
+            return self.send_image(img)
+
+    def send_image(self, image_fp: BinaryIO):
+        """Send an image file-like object to the printer
+
+        Args:
+            image_fp: file-like object of an image to send to the printer
+
+        Returns:
+            dict: the response of the type::
+
+                {rippleUri: str, printUrl: str, previewUrl: str,
+                ordinal: int, token: str}
+            
+                'ordinal' is the number of the image in the machine's queue
+        """
+        # Get image upload service URL and parameters
+        upload_service_config = self._upload_service_config()
+        url = upload_service_config['url']
+        params = upload_service_config['params']
+
+        # Call upload service
+        upload_response = self._upload_image(image_fp=image_fp,
+                                             upload_url=url,
+                                             params=params)
+
+        # Uploaded image URL from upload service
+        uploaded_image_url = upload_response['url']
+
+        # Send uploaded image URL (aka 'Push URL) to printer
+        return self.send_image_url(image_url=uploaded_image_url)
+
     def send_image_url(self, image_url: str):
-        return self._push_url(image_url=image_url)
+        """Send a public image url to the printer (/pushUrl endpoint)
 
-    def send_image_file(self, image_path: str):
-        # Get signed upload URL
-        upload_info = self._get_signed_url()
-        print(f"{upload_info=}")
+        Args:
+            image_url: image url to send to the printer
 
-        # Upload
-        upload_response = self._upload_image(image_path=image_path,
-                                             upload_url=upload_info['url'],
-                                             params=upload_info['params'])
-        print(f"{upload_response=}")
+        Returns:
+            dict: the response of the type::
 
-        # Push URL of uploaded image
-        return self._push_url(image_url=upload_response['url'])
-
-    def _get_signed_url(self):
-        endpoint = urljoin(RIPPLE_API_URL, f"getSignedUrl/{self.location_id}")
-        r = requests.get(endpoint)
-        return extract_data(r.json())
-
-    def _upload_image(self, image_path: str, upload_url: str, params: dict):
-        files = {"file": (image_path, open(image_path, 'rb'))}
-        # JSON values (e.g. booleans) must be strings (e.g. 'true' instead of True)
-        r = requests.post(upload_url, files=files, data=convert(params))
-        # print(f"{r.request.body=}")
-        return r.json()
-
-    def _push_url(self, image_url: str):
-        endpoint = urljoin(RIPPLE_API_URL, f"pushUrl/{self.location_id}")
+                {rippleUri: str, printUrl: str, previewUrl: str,
+                ordinal: int, token: str}
+            
+                'ordinal' is the number of the image in the machine's queue
+        """
+        endpoint = api_endpoint("pushUrl", self.location_id)
         data = {"rippleUri": image_url}
-        r = requests.post(endpoint, data=data)
-        return extract_data(r.json())
+
+        try:
+            r = requests.post(endpoint, data=data)
+            r.raise_for_status()
+
+            # 'ordinal' is the number on the Ripples machine custom queue
+            rr = RipplesResponse(r.json()).data
+            return rr['ordinal']
+        except requests.exceptions.RequestException as e:
+            raise RipplesException(str(e))
+
+    def _upload_service_config(self):
+        """Get URL and params to Ripples' image upload service (/getSignedUrl endpoint)
+        
+        Returns:
+            dict: the image upload service url and params to use of the type::
+
+                {url: str, downloadUrl: str, params: dict}
+
+                'url' is the endpoint of the image upload service
+                'params' is a dict that must be passed to the upload service
+        """
+        endpoint = api_endpoint("getSignedUrl", self.location_id)
+
+        try:
+            r = requests.get(endpoint)
+            return RipplesResponse(r.json()).data
+        except requests.exceptions.RequestException as e:
+            raise RipplesException(str(e))
+
+    def _upload_image(self, image_fp: str, upload_url: str, params: dict):
+        """Upload an image (file-like object) to Ripple's image upload service
+        
+        Args:
+            image_fp: file-like object of an image to upload
+
+        Returns:
+            dict: the response from the upload service, with many fields.
+                'url' is the URL of the uploaded image
+        """
+
+        files = {"file": image_fp}
+        data = self._stringify(params)
+
+        try:
+            r = requests.post(upload_url, files=files, data=data)
+            # Not a Ripples API endpoint, so no RipplesResponse
+            # TODO: See what it does when there's can error
+            log.debug(f"image service response: {r.json()}")
+            return r.json()
+        except requests.exceptions.RequestException as e:
+            raise RipplesException(str(e))
+
+    def _stringify(self, obj):
+        if isinstance(obj, bool):
+            return str(obj).lower()
+        if isinstance(obj, (list, tuple)):
+            return [self._stringify(i) for i in obj]
+        if isinstance(obj, dict):
+            return {k: self._stringify(v) for k, v in obj.items()}
+        return obj
 
 
-# TODO: Error handling
-# TODO: Better reusable "request crafter" method
+class RipplesResponse:
+
+    def __init__(self, raw_response: dict):
+        try:
+            log.debug(f"{raw_response=}")
+            self._data = raw_response['data']
+            self._error = raw_response['err']
+        except KeyError:
+            msg = f"Unexpected API response, got: {str(raw_response)}"
+            raise RipplesException(msg)
+
+        if self._error != None:
+            msg = f"Error in API response: {str(self._error)}"
+            raise RipplesException(msg)
+        else:
+            log.debug(f"{self.data=}")
+
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def error(self):
+        return self._error
+
+
+class RipplesException(Exception):
+    pass
