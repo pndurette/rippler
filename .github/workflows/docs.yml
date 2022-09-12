@@ -10,8 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
-
+  docs:
     runs-on: ubuntu-latest
 
     steps:
