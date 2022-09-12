@@ -1,0 +1,36 @@
+name: Format Code
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Setup Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install format tools
+      run: |
+        pip install --upgrade pip
+        pip install toml # yapf needs it when a pyproject.toml exists
+        pip install yapf
+        pip install isort
+    - name: Format code
+      run: |
+        yapf . -r -i
+        isort .
+    - name: Push formatted code
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Format code

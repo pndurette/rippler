@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rippler"
+description = "An interface to the Ripples drink printer platform"
+version = "0.1.0"
+authors = [
+    { name = "Pierre-Nicolas Durette", email = "pndurette@gmail.com" }
+]
+dependencies = [
+    "requests ~= 2.28.0"
+]
+
+[project.optional-dependencies]
+docs = ["GenDoc ~= 1.0.1"]
+dev = ["pytest ~= 7.1.3"]
