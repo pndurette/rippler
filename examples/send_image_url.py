@@ -22,6 +22,6 @@ LOCATION_ID = "0123456789abcdef01234567" # Replace with location ID hash
 ripple = Rippler(location_id=LOCATION_ID)
 
 # Test with image URL
-response = ripple.send_image_url(
+image_number = ripple.send_image_url(
     "https://lthub.ubc.ca/files/2021/06/GitHub-Logo.png")
-print(f"{response=}")
+print(f"{image_number=}")
