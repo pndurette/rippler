@@ -91,7 +91,6 @@ class Rippler:
             int: the number representing the image in the
                 custom images print queue on the machine
         """
-        # TODO: try/except
         with open(image_path, "rb") as img:
             return self.send_image(img)
 
@@ -111,12 +110,9 @@ class Rippler:
         params = upload_service_config['params']
 
         # Call upload service
-        upload_response = self._upload_image(image_fp=image_fp,
-                                             upload_url=url,
-                                             params=params)
-
-        # Uploaded image URL from upload service
-        uploaded_image_url = upload_response['url']
+        uploaded_image_url = self._upload_image(image_fp=image_fp,
+                                                upload_url=url,
+                                                params=params)
 
         # Send uploaded image URL (aka 'Push URL) to printer
         return self.send_image_url(image_url=uploaded_image_url)
@@ -170,8 +166,7 @@ class Rippler:
             image_fp: file-like object of an image to upload
 
         Returns:
-            dict: the response from the upload service, with many fields.
-                'url' is the URL of the uploaded image
+            str: the url of the uploaded image
         """
 
         files = {"file": image_fp}
@@ -180,11 +175,16 @@ class Rippler:
         try:
             r = requests.post(upload_url, files=files, data=data)
             # Not a Ripples API endpoint, so no RipplesResponse
-            # TODO: See what it does when there's can error
             log.debug(f"image service response: {r.json()}")
-            return r.json()
+
+            # Uploaded image URL
+            return r.json()['url']
         except requests.exceptions.RequestException as e:
             raise RipplesException(str(e))
+        except KeyError as e:
+            # The url field isn't in the response
+            msg = f"Unexpected API response, got: {str(r.json())}"
+            raise RipplesException(msg)
 
 
 class RipplesResponse:
