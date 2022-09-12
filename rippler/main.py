@@ -12,7 +12,7 @@ RIPPLES_API_URL = "https://webapp.drinkripples.com/api/v1/"
 
 def api_endpoint(*url_parts) -> str:
     """Build a Ripples API URL endpoint
-    
+
     Args:
         *url_parts: parts of the URL,
             e.g. "pushUrl", "123"
@@ -24,6 +24,24 @@ def api_endpoint(*url_parts) -> str:
 
     # Strip the ending slash of each part before joining
     return '/'.join([x.rstrip('/') for x in url_parts])
+
+
+def stringify(obj):
+    """Recursively stringify the boolean values of a dict
+
+    Args:
+        obj: any type or complex type
+
+    Returns:
+        the same object but with booleans transformed to lowercase strings
+    """
+    if isinstance(obj, bool):
+        return str(obj).lower()
+    if isinstance(obj, (list, tuple)):
+        return [stringify(i) for i in obj]
+    if isinstance(obj, dict):
+        return {k: stringify(v) for k, v in obj.items()}
+    return obj
 
 
 class Rippler:
@@ -157,7 +175,7 @@ class Rippler:
         """
 
         files = {"file": image_fp}
-        data = self._stringify(params)
+        data = stringify(params)
 
         try:
             r = requests.post(upload_url, files=files, data=data)
@@ -167,16 +185,6 @@ class Rippler:
             return r.json()
         except requests.exceptions.RequestException as e:
             raise RipplesException(str(e))
-
-    def _stringify(self, obj):
-        """Recursively stringify the values of a dict"""
-        if isinstance(obj, bool):
-            return str(obj).lower()
-        if isinstance(obj, (list, tuple)):
-            return [self._stringify(i) for i in obj]
-        if isinstance(obj, dict):
-            return {k: self._stringify(v) for k, v in obj.items()}
-        return obj
 
 
 class RipplesResponse:
