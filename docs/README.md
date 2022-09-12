@@ -99,8 +99,7 @@ Args:
     image_fp: file-like object of an image to upload
 
 Returns:
-    dict: the response from the upload service, with many fields.
-        'url' is the URL of the uploaded image
+    str: the url of the uploaded image
 ```
 ### rippler.main.`RipplesResponse` [class]
 None
