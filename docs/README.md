@@ -114,3 +114,7 @@ None
 None
 ### rippler.main.`RipplesException` [class] [inherits: `Exception`]
 None
+## [rippler.test_main.py](/rippler/test_main.py)
+---
+### rippler.test_main.`test_Rippler` [function]
+None
