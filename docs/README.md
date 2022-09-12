@@ -11,6 +11,16 @@ Args:
 Returns:
     str: the Ripples API URL followed by url_parts joined by slashes
 ```
+### rippler.main.`stringify` [function]
+```Python
+Recursively stringify the boolean values of a dict
+
+Args:
+    obj: any type or complex type
+
+Returns:
+    the same object but with booleans transformed to lowercase strings
+```
 ### rippler.main.`Rippler` [class]
 None
 #### Rippler.`__init__`
@@ -92,10 +102,6 @@ Returns:
     dict: the response from the upload service, with many fields.
         'url' is the URL of the uploaded image
 ```
-#### Rippler.`_stringify`
-```Python
-Recursively stringify the values of a dict
-```
 ### rippler.main.`RipplesResponse` [class]
 None
 #### RipplesResponse.`__init__`
@@ -116,5 +122,23 @@ None
 None
 ## [rippler.test_main.py](/rippler/test_main.py)
 ---
-### rippler.test_main.`test_Rippler` [function]
+### rippler.test_main.`TestMisc` [class]
+None
+#### TestMisc.`test_stringify`
+None
+#### TestMisc.`test_api_endpoint`
+None
+### rippler.test_main.`TestRipplesResponse` [class]
+None
+#### TestRipplesResponse.`test_unexpected_format`
+None
+#### TestRipplesResponse.`test_error`
+None
+#### TestRipplesResponse.`test_no_error`
+None
+### rippler.test_main.`TestRippler` [class]
+None
+#### TestRippler.`test_locations`
+None
+#### TestRippler.`test_upload_service_config`
 None
