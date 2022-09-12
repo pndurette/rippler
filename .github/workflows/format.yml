@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  docs:
+  format:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +23,7 @@ jobs:
     - name: Install format tools
       run: |
         pip install --upgrade pip
+        pip install toml # yapf needs it when a pyproject.toml exists
         pip install yapf
         pip install isort
     - name: Format code
