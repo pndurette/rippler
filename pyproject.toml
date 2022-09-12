@@ -15,3 +15,4 @@ dependencies = [
 
 [project.optional-dependencies]
 docs = ["GenDoc ~= 1.0.1"]
+dev = ["pytest ~= 7.1.3"]
