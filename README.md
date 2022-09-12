@@ -31,7 +31,7 @@ sequenceDiagram
 		API-->>Client: locations
 		
 		%% Upload image flow
-		Note left of Client: Get Upload Image Service<br/>URL and parameters
+		Note left of Client: Get Image Upload Service<br/>URL and parameters
 		Client->>API: GET /getSignedUrl
 		API-->>Client: upload service config
 		
@@ -41,6 +41,6 @@ sequenceDiagram
 		
 		Note left of Client: Send Uploaded Image URL
 		Client->>API: POST /pushUrl
-		API-->>Client: Confirmation
+		API-->>Client: Confirmation<br/>(with queue number)
 ```
 
