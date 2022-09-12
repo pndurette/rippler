@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rippler"
-description = "Library to interact with the Ripples drink printer platform"
+description = "An interface to the Ripples drink printer platform"
 version = "0.1.0"
 authors = [
     { name = "Pierre-Nicolas Durette", email = "pndurette@gmail.com" }
@@ -14,4 +14,4 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = []
+docs = ["GenDoc ~= 1.0.1"]
