@@ -1,6 +1,5 @@
 import logging
 from typing import BinaryIO
-from urllib.parse import urljoin
 
 import requests
 
@@ -12,14 +11,14 @@ RIPPLES_API_URL = "https://webapp.drinkripples.com/api/v1/"
 
 
 def api_endpoint(*url_parts) -> str:
-    """Build an Ripples API URL endpoint
+    """Build a Ripples API URL endpoint
     
     Args:
         *url_parts: parts of the URL,
             e.g. "pushUrl", "123"
 
     Returns:
-        str: the Ripples API followd by url_parts joined by slashes
+        str: the Ripples API URL followed by url_parts joined by slashes
     """
     url_parts = (RIPPLES_API_URL, ) + url_parts
 
@@ -28,19 +27,19 @@ def api_endpoint(*url_parts) -> str:
 
 
 class Rippler:
-    """Rippler: An interface to the Ripples drink printer platform
-    
-    Args:
-        location_id: the location hash of the Ripples machine location.
-            Use `Ripple.locations()` to find the `location_id`
-    """
 
     def __init__(self, location_id: str):
+        """Rippler: An interface to the Ripples drink printer platform
+            
+            Args:
+                location_id: the location string of the Ripples machine location.
+                    Use `Ripple.locations()` to find the `location_id` (as `id`)
+        """
         self.location_id = location_id
 
     @staticmethod
     def locations(lat: int, lon: int) -> dict:
-        """Fetched closest Ripples machine locations
+        """Fetches closest Ripples machine locations
 
         Args:
             lat (int): the latitude, in decimal degrees
@@ -71,12 +70,8 @@ class Rippler:
             image_path: the path of an image to send to the printer
 
         Returns:
-            dict: the response of the type:
-
-                {rippleUri: str, printUrl: str, previewUrl: str,
-                ordinal: int, token: str}
-
-                'ordinal' is the number of the image in the machine's queue
+            int: the number representing the image in the
+                custom images print queue on the machine
         """
         # TODO: try/except
         with open(image_path, "rb") as img:
@@ -89,12 +84,8 @@ class Rippler:
             image_fp: file-like object of an image to send to the printer
 
         Returns:
-            dict: the response of the type::
-
-                {rippleUri: str, printUrl: str, previewUrl: str,
-                ordinal: int, token: str}
-            
-                'ordinal' is the number of the image in the machine's queue
+            int: the number representing the image in the
+                custom images print queue on the machine
         """
         # Get image upload service URL and parameters
         upload_service_config = self._upload_service_config()
@@ -119,12 +110,8 @@ class Rippler:
             image_url: image url to send to the printer
 
         Returns:
-            dict: the response of the type::
-
-                {rippleUri: str, printUrl: str, previewUrl: str,
-                ordinal: int, token: str}
-            
-                'ordinal' is the number of the image in the machine's queue
+            int: the number representing the image in the
+                custom images print queue on the machine
         """
         endpoint = api_endpoint("pushUrl", self.location_id)
         data = {"rippleUri": image_url}
@@ -133,7 +120,7 @@ class Rippler:
             r = requests.post(endpoint, data=data)
             r.raise_for_status()
 
-            # 'ordinal' is the number on the Ripples machine custom queue
+            # 'ordinal' is the number on the Ripples' machine custom images queue
             rr = RipplesResponse(r.json()).data
             return rr['ordinal']
         except requests.exceptions.RequestException as e:
@@ -182,6 +169,7 @@ class Rippler:
             raise RipplesException(str(e))
 
     def _stringify(self, obj):
+        """Recursively stringify the values of a dict"""
         if isinstance(obj, bool):
             return str(obj).lower()
         if isinstance(obj, (list, tuple)):
@@ -194,6 +182,14 @@ class Rippler:
 class RipplesResponse:
 
     def __init__(self, raw_response: dict):
+        """Response of the Ripples API
+    
+        Response had 'data' and 'err' fields.
+        When there's no error, 'err' is None.
+
+        Args:
+            raw_response (dict): the response from the http request
+        """
         try:
             log.debug(f"{raw_response=}")
             self._data = raw_response['data']
