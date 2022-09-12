@@ -18,7 +18,7 @@ rippler_logger.setLevel(logging.DEBUG)
 urllib3_logger.setLevel(logging.DEBUG)
 
 # Initiatialize with location
-LOCATION_ID = "0123456789abcdef01234567" # Replace with location ID hash
+LOCATION_ID = "0123456789abcdef01234567"  # Replace with location ID hash
 ripple = Rippler(location_id=LOCATION_ID)
 
 # Test with image fp

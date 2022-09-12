@@ -19,8 +19,8 @@ rippler_logger.setLevel(logging.DEBUG)
 urllib3_logger.setLevel(logging.DEBUG)
 
 # Define latitude and longitude
-LAT = 45.50394
-LON = -73.56919
+LAT = 40.74880
+LON = -73.98559
 
 # Fetch locations and pretty print
 locations = Rippler.locations(lat=LAT, lon=LON)
