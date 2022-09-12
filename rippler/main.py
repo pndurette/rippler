@@ -30,7 +30,7 @@ class Rippler:
 
     def __init__(self, location_id: str):
         """Rippler: An interface to the Ripples drink printer platform
-            
+
             Args:
                 location_id: the location string of the Ripples machine location.
                     Use `Ripple.locations()` to find the `location_id` (as `id`)
@@ -183,7 +183,7 @@ class RipplesResponse:
 
     def __init__(self, raw_response: dict):
         """Response of the Ripples API
-    
+
         Response had 'data' and 'err' fields.
         When there's no error, 'err' is None.
 
