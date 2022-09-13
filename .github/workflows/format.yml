@@ -1,10 +1,7 @@
 name: Format Code
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  pull_request
 
 permissions:
   contents: write
