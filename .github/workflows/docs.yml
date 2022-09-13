@@ -1,10 +1,7 @@
 name: Generate Docs
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  pull_request
 
 permissions:
   contents: write
@@ -26,7 +23,6 @@ jobs:
         pip install '.[docs]' 
     - name: Generate docs
       run: |
-        mkdir -p docs
         gendoc --codeFence --fileHeaders --output docs/README.md
     - name: Push docs
       uses: stefanzweifel/git-auto-commit-action@v4
