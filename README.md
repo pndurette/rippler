@@ -22,6 +22,7 @@ This library is meant as a replacement for end-users who wish to create custom d
 ## Image requirements
 
 High contrast images with bold lines, 1700 x 1700 pixels, JPEG or PNG, Grayscale, 8 bit.
+
 See [How to Make the Perfect Ripple](https://support.drinkripples.com/hc/en-us/articles/360018489672-How-to-Make-the-Perfect-Ripple).
 
 ## Disclaimer
