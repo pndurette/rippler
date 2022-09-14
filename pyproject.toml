@@ -7,7 +7,7 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.6"
-license = { file = "LICENSE.md" }
+license = "MIT"
 
 dependencies = [
     "requests ~= 2.28.0"
