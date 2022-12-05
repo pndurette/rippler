@@ -1,3 +1,25 @@
+## [rippler.test_main.py](/rippler/test_main.py)
+---
+### rippler.test_main.`TestMisc` [class]
+None
+#### TestMisc.`test_stringify`
+None
+#### TestMisc.`test_api_endpoint`
+None
+### rippler.test_main.`TestRipplesResponse` [class]
+None
+#### TestRipplesResponse.`test_unexpected_format`
+None
+#### TestRipplesResponse.`test_error`
+None
+#### TestRipplesResponse.`test_no_error`
+None
+### rippler.test_main.`TestRippler` [class]
+None
+#### TestRippler.`test_locations`
+None
+#### TestRippler.`test_upload_service_config`
+None
 ## [rippler.main.py](/rippler/main.py)
 ---
 ### rippler.main.`api_endpoint` [function]
@@ -118,26 +140,4 @@ None
 #### RipplesResponse.`error`
 None
 ### rippler.main.`RipplesException` [class] [inherits: `Exception`]
-None
-## [rippler.test_main.py](/rippler/test_main.py)
----
-### rippler.test_main.`TestMisc` [class]
-None
-#### TestMisc.`test_stringify`
-None
-#### TestMisc.`test_api_endpoint`
-None
-### rippler.test_main.`TestRipplesResponse` [class]
-None
-#### TestRipplesResponse.`test_unexpected_format`
-None
-#### TestRipplesResponse.`test_error`
-None
-#### TestRipplesResponse.`test_no_error`
-None
-### rippler.test_main.`TestRippler` [class]
-None
-#### TestRippler.`test_locations`
-None
-#### TestRippler.`test_upload_service_config`
 None
