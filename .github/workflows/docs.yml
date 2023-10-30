@@ -25,7 +25,7 @@ jobs:
       run: |
         gendoc --codeFence --fileHeaders --output docs/README.md
     - name: Push docs
-      uses: stefanzweifel/git-auto-commit-action@v4
+      uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: Generate docs
         file_pattern: docs/*
