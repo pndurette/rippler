@@ -15,7 +15,7 @@ dependencies = [
 
 [project.optional-dependencies]
 docs = ["GenDoc ~= 1.0.1"]
-dev = ["pytest >= 7.1.3,< 8.4.0"]
+dev = ["pytest >= 7.1.3,< 8.5.0"]
 
 [project.urls]
 homepage = "https://github.com/pndurette/rippler"
